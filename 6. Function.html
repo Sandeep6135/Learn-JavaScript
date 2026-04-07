@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>JS Function Basics</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+        }
+        
+        .box {
+            border: 1px solid #000;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        input {
+            width: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h3>1. Input Values</h3>
+    <div class="box">
+        <input id="num1" type="number" value="10"> +
+        <input id="num2" type="number" value="5">
+        <button onclick="runLogic()">Run Function</button>
+    </div>
+
+    <h3>2. Output</h3>
+    <div class="box" id="resultDisplay">
+        Click the button to see the math.
+    </div>
+
+    <script>
+        // --- THE ENGINE (The Function) ---
+        // This takes two "parameters" (a and b), processes them, and returns the result.
+        function addNumbers(a, b) {
+            return a + b;
+        }
+
+        // --- THE CONTROLLER ---
+        // This grabs the data from the screen and passes it to the engine.
+        function runLogic() {
+            // 1. Get values from inputs
+            let x = Number(document.getElementById("num1").value);
+            let y = Number(document.getElementById("num2").value);
+
+            // 2. Call the function and store the "return" value
+            let sum = addNumbers(x, y);
+
+            // 3. Display the result
+            document.getElementById("resultDisplay").innerHTML =
+                "The function returned: <b>" + sum + "</b>";
+        }
+    </script>
+
+</body>
+
+</html>

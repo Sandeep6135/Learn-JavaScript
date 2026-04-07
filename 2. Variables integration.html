@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>JS Variables State</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 30px;
+            line-height: 1.6;
+        }
+        
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            background: #ddd;
+            border: 1px solid #000;
+        }
+        
+        #output {
+            border-left: 3px solid #333;
+            padding-left: 15px;
+        }
+        
+        .change {
+            color: #d946ef;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Variable Reassignment</h2>
+    <button onclick="showVars()">Update Wallet</button>
+
+    <div id="output">
+        <i>Results will appear here...</i>
+    </div>
+
+    <script>
+        function showVars() {
+            // Constant value (cannot change)
+            const userName = "Sandeep";
+
+            // Initial value
+            let wallet = 10000;
+            let initialWallet = wallet; // Storing the original value to show you the difference
+
+            // Reassignment (The change)
+            wallet = wallet - 3000;
+
+            document.getElementById("output").innerHTML = `
+                <b>Name:</b> ${userName} (const)<br>
+                <b>Original Wallet:</b> ₹${initialWallet}<br>
+                <span class="change">Spent: ₹3000</span><br>
+                <b>Current Wallet:</b> ₹${wallet} (let)
+            `;
+        }
+    </script>
+
+</body>
+
+</html>

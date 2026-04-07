@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>JS Scope Visualizer</title>
+    <style>
+        body {
+            font-family: system-ui;
+            padding: 2rem;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 400px;
+            border: 2px solid #ddd;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        button {
+            background: #f7df1e;
+            border: 1px solid #333;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .scope-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-left: 4px solid #f7df1e;
+        }
+        
+        .error {
+            color: #d93025;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>JS Scope Demo</h2>
+        <p>Global Variable: <code>"I am global"</code></p>
+        <button onclick="runScopeTest()">Run Scope Test</button>
+
+        <div id="output" class="result-box">
+            Click the button to see scope in action.
+        </div>
+    </div>
+
+    <script>
+        // GLOBAL SCOPE: Accessible from everywhere
+        let globalVar = "I am global";
+
+        function runScopeTest() {
+            // LOCAL (FUNCTION) SCOPE: Only accessible inside these curly braces
+            let localVar = "I am local";
+
+            let output = document.getElementById("output");
+
+            output.innerHTML = `
+                <div class="scope-label">Inside the Function:</div>
+                ✅ Global: ${globalVar}<br>
+                ✅ Local: ${localVar}<br>
+                <hr>
+                <div class="scope-label">Outside the Function:</div>
+                ✅ Global: ${globalVar}<br>
+                ❌ Local: <span class="error">ReferenceError</span>
+            `;
+        }
+    </script>
+</body>
+
+</html>

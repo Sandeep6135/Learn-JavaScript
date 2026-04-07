@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Type Conversion Study</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 40px;
+            background: white;
+            color: #333;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        input {
+            padding: 5px;
+            border: 1px solid #999;
+            width: 150px;
+        }
+        
+        button {
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+        
+        #output {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            line-height: 1.8;
+        }
+        
+        .highlight {
+            color: #d97706;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Type Conversion Lab</h2>
+
+    <div class="input-group">
+        <input id="ageInput" type="text" placeholder="Enter age (e.g., 25)">
+        <button onclick="checkAge()">Process Data</button>
+    </div>
+
+    <div id="output">
+        <i>Result will appear here...</i>
+    </div>
+
+    <script>
+        function checkAge() {
+            // 1. COLLECT: All input values start as a "string" type
+            let rawValue = document.getElementById("ageInput").value;
+
+            // 2. CONVERT: Force the string into a number
+            let convertedValue = Number(rawValue);
+
+            let out = document.getElementById("output");
+
+            // 3. VALIDATE: Check if conversion resulted in "NaN" (Not a Number)
+            if (rawValue === "" || isNaN(convertedValue)) {
+                out.innerHTML = "<span style='color:red'>Error: Input is not a valid number.</span>";
+                return;
+            }
+
+            // 4. COMPARE: Now that it's a number, we can do math
+            let category = (convertedValue >= 18) ? "Adult" : "Minor";
+
+            // Displaying the internal "types" so you can see the conversion
+            out.innerHTML = `
+                <b>Input Type:</b> ${typeof rawValue} ("${rawValue}")<br>
+                <b>After Conversion:</b> ${typeof convertedValue} (${convertedValue})<br>
+                <b>Final Result:</b> <span class="highlight">${category}</span>
+            `;
+        }
+    </script>
+</body>
+
+</html>

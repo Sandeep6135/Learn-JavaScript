@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>JS Data Types</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 30px;
+            line-height: 1.5;
+        }
+        
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .result-line {
+            border-bottom: 1px solid #eee;
+            padding: 5px 0;
+        }
+        
+        .type-label {
+            color: #005cc5;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Data Type Lab</h2>
+    <button onclick="checkTypes()">Inspect Variables</button>
+
+    <div id="output">
+    </div>
+
+    <script>
+        function checkTypes() {
+            // Primitive Types
+            let name = "Sandeep"; // String
+            let age = 22; // Number
+            let isStudent = true; // Boolean
+            let empty = null; // Null (Special case)
+
+            // Structural Types (Objects)
+            let colors = ["red", "green"]; // Array
+            let person = {
+                age: 22
+            }; // Object
+
+            const out = document.getElementById("output");
+
+            // Helper function to format the output
+            const show = (label, value) => {
+                let type = typeof value;
+                return `<div class="result-line">${label}: <span class="type-label">${type}</span></div>`;
+            };
+
+            out.innerHTML =
+                show("Name ('Aman')", name) +
+                show("Age (22)", age) +
+                show("IsStudent (true)", isStudent) +
+                show("Empty (null)", empty) +
+                show("Colors ([])", colors) +
+                show("Person ({})", person);
+        }
+    </script>
+
+</body>
+
+</html>
