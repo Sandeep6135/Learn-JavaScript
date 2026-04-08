@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite 3D Dice Roller</title>
+    <style>
+         :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #00cec9;
+            --bg: #0f0c29;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            overflow: hidden;
+        }
+        /* Container Card */
+        
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 350px;
+            position: relative;
+        }
+        /* 3D Dice Scene */
+        
+        .scene {
+            width: 100px;
+            height: 100px;
+            margin: 40px auto;
+            perspective: 600px;
+        }
+        
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .face {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: white;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            border-radius: 12px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
+            color: #2d3436;
+        }
+        /* Dot styling for a realistic look */
+        
+        .face span {
+            width: 18px;
+            height: 18px;
+            background: #2d3436;
+            border-radius: 50%;
+            display: block;
+        }
+        /* Position faces in 3D space */
+        
+        .front {
+            transform: rotateY(0deg) translateZ(50px);
+        }
+        
+        .back {
+            transform: rotateY(180deg) translateZ(50px);
+        }
+        
+        .right {
+            transform: rotateY(90deg) translateZ(50px);
+        }
+        
+        .left {
+            transform: rotateY(-90deg) translateZ(50px);
+        }
+        
+        .top {
+            transform: rotateX(90deg) translateZ(50px);
+        }
+        
+        .bottom {
+            transform: rotateX(-90deg) translateZ(50px);
+        }
+        /* Stats Section */
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+        
+        .stat-box b {
+            display: block;
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+        /* Buttons */
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.6);
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-reset {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 0.8rem;
+            padding: 8px;
+            box-shadow: none;
+        }
+        
+        #history {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            height: 40px;
+            overflow-y: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <h2 style="margin: 0; font-weight: 300; letter-spacing: 2px;">LUCKY ROLLER</h2>
+
+        <div class="scene">
+            <div class="cube" id="cube">
+                <div class="face front">1</div>
+                <div class="face back">6</div>
+                <div class="face right">3</div>
+                <div class="face left">4</div>
+                <div class="face top">2</div>
+                <div class="face bottom">5</div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">Min <b id="min">-</b></div>
+            <div class="stat-box">Max <b id="max">-</b></div>
+            <div class="stat-box" style="grid-column: span 2">Total Rolls <b id="count">0</b></div>
+        </div>
+
+        <button onclick="rollDice()">ROLL THE DICE</button>
+        <button class="btn-reset" onclick="resetGame()">Reset Stats</button>
+
+        <div id="history">History: Empty</div>
+    </div>
+
+    <script>
+        const cube = document.getElementById('cube');
+        let rolls = [];
+        let currentMin = Infinity;
+        let currentMax = -Infinity;
+
+        // Map results to CSS rotations
+        const rotations = {
+            1: 'rotateX(0deg) rotateY(0deg)',
+            2: 'rotateX(-90deg) rotateY(0deg)',
+            3: 'rotateX(0deg) rotateY(-90deg)',
+            4: 'rotateX(0deg) rotateY(90deg)',
+            5: 'rotateX(90deg) rotateY(0deg)',
+            6: 'rotateX(180deg) rotateY(0deg)'
+        };
+
+        function rollDice() {
+            // 1. Generate Result
+            const result = Math.floor(Math.random() * 6) + 1;
+
+            // 2. Add "Extra Spins" for visual flair
+            const extraSpinX = Math.floor(Math.random() * 3) * 360;
+            const extraSpinY = Math.floor(Math.random() * 3) * 360;
+
+            // 3. Apply 3D Transform
+            cube.style.transform = `${rotations[result]} rotateX(${extraSpinX}deg) rotateY(${extraSpinY}deg)`;
+
+            // 4. Update Logic after animation starts
+            setTimeout(() => {
+                currentMin = Math.min(currentMin, result);
+                currentMax = Math.max(currentMax, result);
+                rolls.push(result);
+
+                document.getElementById("min").textContent = currentMin;
+                document.getElementById("max").textContent = currentMax;
+                document.getElementById("count").textContent = rolls.length;
+
+                const historyEl = document.getElementById("history");
+                historyEl.textContent = `History: ${rolls.slice(-10).join(", ")}${rolls.length > 10 ? '...' : ''}`;
+            }, 300);
+        }
+
+        function resetGame() {
+            rolls = [];
+            currentMin = Infinity;
+            currentMax = -Infinity;
+            document.getElementById("min").textContent = "-";
+            document.getElementById("max").textContent = "-";
+            document.getElementById("count").textContent = "0";
+            document.getElementById("history").textContent = "History: Empty";
+            cube.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        }
+    </script>
+
+</body>
+
+</html>

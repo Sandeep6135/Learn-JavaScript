@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>JS Array Basics</title>
+    <style>
+        body {
+            font-family: system-ui;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        
+        .array-container {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        code {
+            background: #eee;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>JavaScript Array Explorer</h2>
+    <button onclick="renderArray()">Update Output</button>
+
+    <div id="output" class="array-container">
+        Click the button to visualize the array!
+    </div>
+
+    <script>
+        function renderArray() {
+            // 1. Defining the array
+            const fruits = ["Apple", "Banana", "Mango", "Grapes"];
+            const display = document.getElementById("output");
+
+            // 2. Using Template Literals (Backticks ``) for cleaner HTML generation
+            // 3. Using .map() is more "Modern JS" than a standard for-loop
+            const listItems = fruits.map((fruit, index) => {
+                return `<li>Index <code>[${index}]</code> holds the value: <strong>${fruit}</strong></li>`;
+            }).join('');
+
+            display.innerHTML = `
+                <p><strong>Array Length:</strong> ${fruits.length}</p>
+                <ul>${listItems}</ul>
+                <p><em>Pro tip: Arrays in JS start at index 0!</em></p>
+            `;
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #f0f2f5;
+            color: #1a1a1a;
+        }
+        
+        .card {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 360px;
+        }
+        
+        h2 {
+            margin: 0 0 20px 0;
+            font-size: 1.2rem;
+            color: #555;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        
+        input:focus {
+            border-color: #007AFF;
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+        }
+        
+        #output {
+            margin-top: 24px;
+            border-top: 1px solid #eee;
+            padding-top: 16px;
+        }
+        
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .stat b {
+            color: #666;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        /* Dynamic colors for types */
+        
+        .type-number {
+            color: #007AFF;
+            background: #eef6ff;
+        }
+        
+        .type-string {
+            color: #34C759;
+            background: #f0fff4;
+        }
+        
+        .type-object {
+            color: #AF52DE;
+            background: #f8f0ff;
+        }
+        
+        .type-boolean {
+            color: #FF9500;
+            background: #fff7ed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <h2>Type Inspector</h2>
+        <input id="val" type="text" placeholder="Try 42,, or 'Hello'..." oninput="checkType()">
+
+        <div id="output">
+            <div class="stat"><b>Detected Type</b> <span id="t-type" class="badge">-</span></div>
+            <div class="stat"><b>Is Array?</b> <span id="t-arr" class="badge">-</span></div>
+            <div class="stat"><b>Numeric</b> <span id="t-num" class="badge">-</span></div>
+        </div>
+    </div>
+
+    <script>
+        function checkType() {
+            const raw = document.getElementById("val").value.trim();
+            const typeEl = document.getElementById("t-type");
+            const arrEl = document.getElementById("t-arr");
+            const numEl = document.getElementById("t-num");
+
+            if (!raw) {
+                reset();
+                return;
+            }
+
+            let parsedValue;
+            let detectedType;
+
+            // 1. Try to parse as JSON (handles numbers, booleans, arrays, objects)
+            try {
+                parsedValue = JSON.parse(raw);
+                detectedType = typeof parsedValue;
+            } catch (e) {
+                // 2. If JSON.parse fails, it's a plain string
+                parsedValue = raw;
+                detectedType = "string";
+            }
+
+            // Update UI
+            typeEl.innerText = detectedType;
+            typeEl.className = `badge type-${detectedType}`;
+
+            const isArr = Array.isArray(parsedValue);
+            arrEl.innerText = isArr ? "Yes" : "No";
+            arrEl.style.color = isArr ? "#34C759" : "#666";
+
+            const isNum = typeof parsedValue === 'number';
+            numEl.innerText = isNum ? "Yes" : "No";
+            numEl.style.color = isNum ? "#007AFF" : "#666";
+        }
+
+        function reset() {
+            document.querySelectorAll('.badge').forEach(s => {
+                s.innerText = "-";
+                s.className = "badge";
+                s.style.color = "";
+            });
+        }
+    </script>
+
+</body>
+
+</html>

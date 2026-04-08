@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>JS Objects Explorer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #eef2f3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+        }
+        
+        button:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+        
+        #output {
+            margin-top: 1.5rem;
+            text-align: left;
+            border-top: 1px solid #eee;
+            padding-top: 1rem;
+            display: none;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .label {
+            font-weight: bold;
+            color: #64748b;
+            text-transform: capitalize;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <h2>Student Profile</h2>
+        <button onclick="toggleInfo()">View Student Details</button>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function toggleInfo() {
+            const outputDiv = document.getElementById("output");
+
+            // 1. Defining the Object (Fixed Syntax)
+            const student = {
+                name: "Sandeep",
+                age: 18,
+                course: "Unethical Hacking",
+                city: "Samsung Galaxy",
+                grade: "Z+ Security"
+            };
+
+            // 2. Optimization: Using Template Literals (backticks ``) instead of string concatenation
+            let htmlContent = "";
+
+            for (let key in student) {
+                htmlContent += `
+            <div class="info-row">
+                <span class="label">${key}:</span>
+                <span class="value">${student[key]}</span>
+            </div>`;
+            }
+
+            outputDiv.innerHTML = htmlContent;
+
+            // Simple toggle logic
+            outputDiv.style.display = (outputDiv.style.display === "block") ? "none" : "block";
+        }
+    </script>
+
+</body>
+
+</html>

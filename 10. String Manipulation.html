@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>JS String Methods 101</title>
+    <style>
+        body {
+            font-family: system-ui;
+            max-width: 500px;
+            margin: 2rem auto;
+            line-height: 1.5;
+        }
+        
+        .result-box {
+            background: #f4f4f9;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        input {
+            padding: 8px;
+            width: 60%;
+        }
+        
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        
+        b {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>String Operations</h2>
+    <input id="userInput" type="text" placeholder="Type something...">
+    <button onclick="processString()">Run</button>
+
+    <div id="display" class="result-box">
+        Results will appear here...
+    </div>
+
+    <script>
+        function processString() {
+            const rawValue = document.getElementById("userInput").value;
+            const str = rawValue.trim(); // Removes whitespace from both ends
+
+            if (!str) {
+                document.getElementById("display").innerHTML = "<em>Please enter some text.</em>";
+                return;
+            }
+
+            // Using an array to build the output clearly
+            const results = [
+                `<b>Original (trimmed):</b> ${str}`,
+                `<b>.length:</b> ${str.length} (Total characters)`,
+                `<b>.toUpperCase():</b> ${str.toUpperCase()}`,
+                `<b>.toLowerCase():</b> ${str.toLowerCase()}`,
+                `<b>.charAt(0):</b> ${str.charAt(0)} (First letter)`,
+                `<b>.slice(0, 3):</b> ${str.slice(0, 3)} (First three letters)`,
+                `<b>Template Literal:</b> "Welcome, ${str}!"`
+            ];
+
+            document.getElementById("display").innerHTML = results.join("<br>");
+        }
+    </script>
+
+</body>
+
+</html>
