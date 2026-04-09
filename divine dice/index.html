@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Divine Dice - Local Sessions</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;500;700&display=swap');
+         :root {
+            --bg-color: #0d1117;
+            --panel-bg: rgba(20, 25, 35, 0.6);
+            --gold-primary: #d4af37;
+            --gold-glow: rgba(212, 175, 55, 0.4);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --dice-size: 90px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html,
+        body {
+            width: 100%;
+            min-height: 100vh;
+        }
+        
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.15) 0%, transparent 50%), radial-gradient(circle at 50% 100%, rgba(15, 23, 42, 1) 0%, transparent 50%);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            perspective: 2000px;
+            overflow-x: hidden;
+        }
+        /* Modal Styles */
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: var(--panel-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 32px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            max-width: 520px;
+            width: 90%;
+            animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+        
+        .modal-btn-full {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            color: var(--gold-primary);
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+        
+        .modal-btn-full:hover:not(:disabled) {
+            background: rgba(212, 175, 55, 0.15);
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+        
+        .modal-btn-full:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 2rem;
+        }
+        
+        .mode-btn {
+            padding: 1.2rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            border-radius: 16px;
+            color: var(--text-main);
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mode-btn:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold-primary);
+            transform: translateY(-3px);
+        }
+        
+        .error-message {
+            background: rgba(255, 100, 100, 0.2);
+            border: 1px solid rgba(255, 100, 100, 0.5);
+            color: #ff9999;
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        /* Connection Status */
+        
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 0.6rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .connection-status.connected {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.5);
+            color: #00ff88;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            background: #00ff88;
+            animation: pulse 2s infinite;
+        }
+        /* Layouts */
+        
+        .main-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 60px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .player-badge {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 0.6rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .player-name-display {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            color: var(--gold-primary);
+        }
+        
+        .game-mode-badge {
+            background: rgba(150, 100, 255, 0.2);
+            border: 1px solid rgba(150, 100, 255, 0.5);
+            color: #b366ff;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .session-code-display {
+            background: rgba(0, 200, 150, 0.15);
+            border: 1px solid rgba(0, 200, 150, 0.3);
+            color: #00ffa6;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--gold-primary);
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .header-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            box-shadow: 0 0 15px var(--gold-glow);
+            transform: scale(1.1);
+        }
+        
+        .content-area {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2rem;
+        }
+        
+        .dashboard {
+            background: var(--panel-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dashboard-header-stats {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+            min-height: 30px;
+            margin-bottom: 10px;
+        }
+        
+        .streak-badge {
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid var(--gold-primary);
+            color: var(--gold-primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--gold-glow);
+        }
+        
+        .streak-badge.active {
+            opacity: 1;
+            animation: pulse 0.6s infinite;
+        }
+        
+        .roll-counter {
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid var(--gold-primary);
+            color: var(--gold-primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .title-group {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.3rem;
+        }
+        
+        .subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+        
+        .stat-value {
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            color: var(--gold-primary);
+            font-weight: 700;
+        }
+        
+        .last-five-display {
+            background: rgba(0, 150, 200, 0.1);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .last-five-rolls {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .roll-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #00ff88;
+            font-weight: bold;
+        }
+        
+        .roll-dot.filled {
+            background: rgba(0, 255, 136, 0.4);
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        /* Dice Arena */
+        
+        .dice-arena {
+            height: 200px;
+            position: relative;
+            perspective: 1000px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        
+        .cube {
+            width: var(--dice-size);
+            height: var(--dice-size);
+            position: relative;
+            transform-style: preserve-3d;
+            transform: translateZ(-45px) rotateX(-20deg) rotateY(20deg);
+        }
+        
+        .face {
+            position: absolute;
+            width: var(--dice-size);
+            height: var(--dice-size);
+            background: #111;
+            border-radius: 16px;
+            display: grid;
+            grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.9), inset 0 0 5px rgba(212, 175, 55, 0.3);
+            backface-visibility: hidden;
+        }
+        
+        .dot {
+            width: 14px;
+            height: 14px;
+            background: radial-gradient(circle at 30% 30%, #fff6cc, #d4af37, #997a00);
+            border-radius: 50%;
+            align-self: center;
+            justify-self: center;
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+        
+        .front {
+            transform: rotateY(0deg) translateZ(calc(var(--dice-size) / 2));
+        }
+        
+        .back {
+            transform: rotateY(180deg) translateZ(calc(var(--dice-size) / 2));
+        }
+        
+        .right {
+            transform: rotateY(90deg) translateZ(calc(var(--dice-size) / 2));
+        }
+        
+        .left {
+            transform: rotateY(-90deg) translateZ(calc(var(--dice-size) / 2));
+        }
+        
+        .top {
+            transform: rotateX(90deg) translateZ(calc(var(--dice-size) / 2));
+        }
+        
+        .bottom {
+            transform: rotateX(-90deg) translateZ(calc(var(--dice-size) / 2));
+        }
+        
+        .shadow {
+            position: absolute;
+            bottom: 15px;
+            width: 70px;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50%;
+            filter: blur(8px);
+        }
+        
+        .distribution {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 1rem;
+        }
+        
+        .bars {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 50px;
+            gap: 6px;
+        }
+        
+        .bar-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .bar {
+            width: 100%;
+            background: rgba(212, 175, 55, 0.15);
+            border-radius: 3px 3px 0 0;
+            min-height: 2px;
+            transition: height 0.4s;
+        }
+        
+        .bar.highlight {
+            background: var(--gold-primary);
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+        
+        .bar-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+        
+        .roll-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            color: var(--gold-primary);
+            font-family: 'Cinzel', serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        
+        .roll-btn:hover:not(:disabled) {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 20px var(--gold-glow);
+            transform: translateY(-2px);
+        }
+        
+        .roll-btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+        
+        .roll-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        /* Leaderboard & Lobby List */
+        
+        .right-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 24px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 0.4fr 1.2fr 0.8fr;
+            gap: 8px;
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            margin-bottom: 0.8rem;
+        }
+        
+        .leaderboard-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .leaderboard-item {
+            display: grid;
+            grid-template-columns: 0.4fr 1.2fr 0.8fr;
+            gap: 8px;
+            padding: 0.9rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .leaderboard-item:hover {
+            background: rgba(212, 175, 55, 0.1);
+            transform: translateX(4px);
+        }
+        
+        .status-ready {
+            color: #00ff88;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-align: right;
+        }
+        
+        .status-waiting {
+            color: #ff9999;
+            font-size: 0.8rem;
+            text-align: right;
+        }
+        
+        @keyframes gentleFloat {
+            0%,
+            100% {
+                transform: translateZ(-45px) rotateX(-20deg) rotateY(20deg) translateY(0);
+            }
+            50% {
+                transform: translateZ(-45px) rotateX(-15deg) rotateY(25deg) translateY(-8px);
+            }
+        }
+        
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        .floating {
+            animation: gentleFloat 4s ease-in-out infinite;
+        }
+        /* Toasts */
+        
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 2000;
+            pointer-events: none;
+        }
+        
+        .toast {
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border-left: 4px solid var(--gold-primary);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .content-area {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="connection-status connected" id="connectionStatus">
+        <span class="status-dot"></span><span>Local mode</span>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="modal-overlay active" id="nameModal">
+        <div class="modal-content">
+            <div class="modal-title">Divine Dice</div>
+            <div class="modal-subtitle">Local Sessions (GitHub Pages)</div>
+            <input type="text" class="input-field" id="nameInput" placeholder="Enter your name..." maxlength="15">
+            <div id="nameError"></div>
+            <button class="modal-btn-full" onclick="showModeSelector()">Continue</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modeModal">
+        <div class="modal-content">
+            <div class="modal-title">Game Mode</div>
+            <div class="modal-subtitle">Choose how you want to play</div>
+            <div class="mode-selector">
+                <button class="mode-btn" onclick="showCreateSettings()"><div>🎲</div><div>Create</div></button>
+                <button class="mode-btn" onclick="showJoinInput()"><div>🔑</div><div>Join</div></button>
+            </div>
+            <div class="modal-subtitle" style="margin-top:1rem; font-size:0.8rem;">
+                Note: Join works only on this same browser/device (no server).
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="createModal">
+        <div class="modal-content">
+            <div class="modal-title">Lobby Settings</div>
+            <div class="modal-subtitle">How many heroes?</div>
+            <input type="number" class="input-field" id="maxPlayersInput" placeholder="Max Players (2-8)" min="2" max="8" value="2">
+            <button class="modal-btn-full" id="createExecuteBtn" onclick="createSession()">Forge Lobby</button>
+            <button class="modal-btn-full" style="background: rgba(200,0,0,0.1); color: #ff9999; border-color: rgba(255,0,0,0.3);" onclick="backToMode('createModal')">Back</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="joinModal">
+        <div class="modal-content">
+            <div class="modal-title">Join Game</div>
+            <div class="modal-subtitle">Enter the secret cipher</div>
+            <input type="text" class="input-field" id="joinCodeInput" placeholder="Code..." maxlength="6" style="text-transform: uppercase;">
+            <div id="joinError"></div>
+            <button class="modal-btn-full" id="joinExecuteBtn" onclick="joinSession()">Enter Lobby</button>
+            <button class="modal-btn-full" style="background: rgba(200,0,0,0.1); color: #ff9999; border-color: rgba(255,0,0,0.3);" onclick="backToMode('joinModal')">Back</button>
+        </div>
+    </div>
+
+    <div class="main-container" id="lobbyContainer" style="display: none;">
+        <div class="header">
+            <div class="header-left">
+                <div class="player-badge">
+                    <div class="player-name-display" id="lobbyPlayerName">Player</div>
+                    <div class="game-mode-badge" id="lobbyRole">Host</div>
+                </div>
+                <div class="session-code-display" id="lobbyCodeDisplay"></div>
+            </div>
+            <div class="header-right">
+                <button class="header-btn" onclick="exitGame()" title="Exit Game">🚪</button>
+            </div>
+        </div>
+
+        <div class="content-area" style="grid-template-columns: 1fr; max-width: 700px; margin: 0 auto; width: 100%;">
+            <div class="dashboard" style="align-items: center; padding: 3rem;">
+                <div class="title-group">
+                    <div class="title">Waiting Room</div>
+                    <div class="subtitle" id="lobbyCountText">Players: 1/2</div>
+                </div>
+
+                <div class="leaderboard-list" id="lobbyList" style="width: 100%; margin: 2rem 0; min-height: 150px;"></div>
+
+                <button class="roll-btn" id="readyBtn" onclick="toggleReadyState()" style="margin-bottom: 1rem;">Declare Ready</button>
+                <button class="roll-btn" id="startGameBtn" onclick="hostStartGame()" style="display: none;" disabled>Begin Game</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container" id="gameContainer" style="display: none;">
+        <div class="header">
+            <div class="header-left">
+                <div class="player-badge">
+                    <div class="player-name-display" id="playerName">Player</div>
+                    <div class="game-mode-badge">Active</div>
+                </div>
+                <div class="session-code-display" id="gameCodeDisplay"></div>
+            </div>
+            <div class="header-right">
+                <button class="header-btn" id="soundToggle" title="Toggle Sound">🔊</button>
+                <button class="header-btn" onclick="exitGame()" title="Exit Game">🚪</button>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="left-panel">
+                <div class="dashboard">
+                    <div class="dashboard-header-stats">
+                        <div class="streak-badge" id="streakBadge">🔥 3 IN A ROW!</div>
+                        <div class="roll-counter" id="rollCounter">0/5</div>
+                    </div>
+
+                    <div class="title-group">
+                        <div class="title">Divine Dice</div>
+                        <div class="subtitle">Arena</div>
+                    </div>
+
+                    <div class="stats-row">
+                        <div class="stat-item"><span class="stat-label">Avg (L5)</span><span class="stat-value" id="currentAvg">-</span></div>
+                        <div class="stat-item"><span class="stat-label">Last Roll</span><span class="stat-value" id="currentRoll">-</span></div>
+                        <div class="stat-item"><span class="stat-label">Total Rolls</span><span class="stat-value" id="totalCount">0</span></div>
+                    </div>
+
+                    <div class="last-five-display">
+                        <div class="last-five-rolls" id="last5Rolls"></div>
+                    </div>
+
+                    <div class="dice-arena">
+                        <div class="cube floating" id="cube">
+                            <div class="face front">
+                                <div class="dot" style="grid-area: 2/2"></div>
+                            </div>
+                            <div class="face back">
+                                <div class="dot" style="grid-area: 1/1"></div>
+                                <div class="dot" style="grid-area: 1/3"></div>
+                                <div class="dot" style="grid-area: 2/1"></div>
+                                <div class="dot" style="grid-area: 2/3"></div>
+                                <div class="dot" style="grid-area: 3/1"></div>
+                                <div class="dot" style="grid-area: 3/3"></div>
+                            </div>
+                            <div class="face right">
+                                <div class="dot" style="grid-area: 1/3"></div>
+                                <div class="dot" style="grid-area: 2/2"></div>
+                                <div class="dot" style="grid-area: 3/1"></div>
+                            </div>
+                            <div class="face left">
+                                <div class="dot" style="grid-area: 1/1"></div>
+                                <div class="dot" style="grid-area: 1/3"></div>
+                                <div class="dot" style="grid-area: 3/1"></div>
+                                <div class="dot" style="grid-area: 3/3"></div>
+                            </div>
+                            <div class="face top">
+                                <div class="dot" style="grid-area: 1/3"></div>
+                                <div class="dot" style="grid-area: 3/1"></div>
+                            </div>
+                            <div class="face bottom">
+                                <div class="dot" style="grid-area: 1/1"></div>
+                                <div class="dot" style="grid-area: 1/3"></div>
+                                <div class="dot" style="grid-area: 2/2"></div>
+                                <div class="dot" style="grid-area: 3/1"></div>
+                                <div class="dot" style="grid-area: 3/3"></div>
+                            </div>
+                        </div>
+                        <div class="shadow" id="shadow"></div>
+                        <div id="particles" style="position: absolute; inset: 0; pointer-events: none;"></div>
+                    </div>
+
+                    <button class="roll-btn" id="rollBtn" onclick="rollDice()">Cast The Bones</button>
+
+                    <div class="distribution">
+                        <div class="bars" id="chartBars">
+                            <div class="bar-container">
+                                <div class="bar" id="bar-1"></div><span class="bar-label">1</span></div>
+                            <div class="bar-container">
+                                <div class="bar" id="bar-2"></div><span class="bar-label">2</span></div>
+                            <div class="bar-container">
+                                <div class="bar" id="bar-3"></div><span class="bar-label">3</span></div>
+                            <div class="bar-container">
+                                <div class="bar" id="bar-4"></div><span class="bar-label">4</span></div>
+                            <div class="bar-container">
+                                <div class="bar" id="bar-5"></div><span class="bar-label">5</span></div>
+                            <div class="bar-container">
+                                <div class="bar" id="bar-6"></div><span class="bar-label">6</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div style="font-family:'Cinzel', serif; font-size:1.3rem; color:var(--gold-primary); text-align:center; margin-bottom:1rem;">🏆 Rankings</div>
+                <div class="leaderboard-header">
+                    <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">#</div>
+                    <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Player</div>
+                    <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Avg</div>
+                </div>
+                <div class="leaderboard-list" id="leaderboard"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /***********************
+         * Local Session Engine
+         ***********************/
+        const STORAGE_KEY = 'divine_dice_local_sessions_v1';
+
+        function loadAllSessions() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            } catch {
+                return {};
+            }
+        }
+
+        function saveAllSessions(all) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+        }
+
+        function generateSessionCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+            return code;
+        }
+
+        function nowISO() {
+            return new Date().toISOString();
+        }
+
+        function ensureSession(code) {
+            const all = loadAllSessions();
+            return all[code] || null;
+        }
+
+        function upsertSession(session) {
+            const all = loadAllSessions();
+            all[session.code] = session;
+            saveAllSessions(all);
+        }
+
+        function deleteSession(code) {
+            const all = loadAllSessions();
+            delete all[code];
+            saveAllSessions(all);
+        }
+
+        /***********************
+         * UI Helpers
+         ***********************/
+        function showToast(message, ms = 2500) {
+            const container = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            el.className = 'toast';
+            el.textContent = message;
+            container.appendChild(el);
+            setTimeout(() => el.remove(), ms);
+        }
+
+        function showModal(id) {
+            ['nameModal', 'modeModal', 'createModal', 'joinModal'].forEach(mid => {
+                document.getElementById(mid).classList.remove('active');
+            });
+            document.getElementById(id).classList.add('active');
+        }
+
+        function showContainer(containerId) {
+            document.getElementById('lobbyContainer').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById(containerId).style.display = 'block';
+        }
+
+        function setError(elId, msg) {
+            const el = document.getElementById(elId);
+            el.innerHTML = msg ? `<div class="error-message">${msg}</div>` : '';
+        }
+
+        /***********************
+         * State
+         ***********************/
+        const state = {
+            name: '',
+            code: '',
+            isHost: false,
+            isReady: false,
+            soundEnabled: true,
+            isRolling: false,
+            rolls: [],
+            freq: {
+                1: 0,
+                2: 0,
+                3: 0,
+                4: 0,
+                5: 0,
+                6: 0
+            },
+            currentStreak: {
+                value: 0,
+                count: 0
+            },
+            maxPlayers: 2
+        };
+
+        const faceRotations = {
+            1: {
+                x: 0,
+                y: 0
+            },
+            2: {
+                x: -90,
+                y: 0
+            },
+            3: {
+                x: 0,
+                y: -90
+            },
+            4: {
+                x: 0,
+                y: 90
+            },
+            5: {
+                x: 90,
+                y: 0
+            },
+            6: {
+                x: 180,
+                y: 0
+            }
+        };
+
+        /***********************
+         * Flow: Name -> Mode
+         ***********************/
+        function showModeSelector() {
+            const nameInput = document.getElementById('nameInput');
+            const name = (nameInput.value || '').trim();
+            if (!name) return setError('nameError', 'Please enter your name.');
+            if (name.length > 15) return setError('nameError', 'Name too long.');
+
+            setError('nameError', '');
+            state.name = name;
+
+            showModal('modeModal');
+        }
+
+        function showCreateSettings() {
+            showModal('createModal');
+        }
+
+        function showJoinInput() {
+            setError('joinError', '');
+            showModal('joinModal');
+            document.getElementById('joinCodeInput').value = '';
+            document.getElementById('joinCodeInput').focus();
+        }
+
+        function backToMode(fromModalId) {
+            document.getElementById(fromModalId).classList.remove('active');
+            showModal('modeModal');
+        }
+
+        /***********************
+         * Local "Create / Join"
+         ***********************/
+        function createSession() {
+            const maxPlayers = Math.max(2, Math.min(8, Number(document.getElementById('maxPlayersInput').value || 2)));
+            state.maxPlayers = maxPlayers;
+
+            // Unique-ish code
+            let code = generateSessionCode();
+            let tries = 0;
+            while (ensureSession(code) && tries < 20) {
+                code = generateSessionCode();
+                tries++;
+            }
+
+            const session = {
+                code,
+                hostName: state.name,
+                maxPlayers,
+                state: 'lobby',
+                createdAt: nowISO(),
+                players: [{
+                    name: state.name,
+                    isReady: false,
+                    joinedAt: nowISO(),
+                    last5: [],
+                    totalRolls: 0
+                }],
+                rolls: [] // session roll events
+            };
+
+            upsertSession(session);
+
+            state.code = code;
+            state.isHost = true;
+            state.isReady = false;
+
+            enterLobbyUI();
+            renderLobby();
+            showToast(`Lobby created: ${code}`);
+        }
+
+        function joinSession() {
+            const code = (document.getElementById('joinCodeInput').value || '').trim().toUpperCase();
+            if (!code || code.length !== 6) return setError('joinError', 'Enter a valid 6-character code.');
+
+            const session = ensureSession(code);
+            if (!session) return setError('joinError', 'Session not found in this browser. (Local mode)');
+
+            // prevent duplicate name
+            if (session.players.some(p => p.name.toLowerCase() === state.name.toLowerCase())) {
+                return setError('joinError', 'That name is already in this session.');
+            }
+
+            if (session.players.length >= session.maxPlayers) {
+                return setError('joinError', 'Lobby is full.');
+            }
+
+            session.players.push({
+                name: state.name,
+                isReady: false,
+                joinedAt: nowISO(),
+                last5: [],
+                totalRolls: 0
+            });
+            upsertSession(session);
+
+            state.code = code;
+            state.isHost = false;
+            state.isReady = false;
+
+            enterLobbyUI();
+            renderLobby();
+            showToast(`Joined lobby: ${code}`);
+        }
+
+        function enterLobbyUI() {
+            showContainer('lobbyContainer');
+            ['nameModal', 'modeModal', 'createModal', 'joinModal'].forEach(id => document.getElementById(id).classList.remove('active'));
+
+            document.getElementById('lobbyPlayerName').textContent = state.name;
+            document.getElementById('lobbyRole').textContent = state.isHost ? 'Host' : 'Player';
+            document.getElementById('lobbyCodeDisplay').textContent = `CODE: ${state.code}`;
+
+            // host can start, others cannot
+            document.getElementById('startGameBtn').style.display = state.isHost ? 'block' : 'none';
+            document.getElementById('startGameBtn').disabled = true;
+            document.getElementById('readyBtn').textContent = 'Declare Ready';
+        }
+
+        function toggleReadyState() {
+            const session = ensureSession(state.code);
+            if (!session) return showToast('Session missing (local storage).');
+
+            const me = session.players.find(p => p.name === state.name);
+            if (!me) return showToast('Player not found in session.');
+
+            me.isReady = !me.isReady;
+            upsertSession(session);
+
+            state.isReady = me.isReady;
+            document.getElementById('readyBtn').textContent = state.isReady ? 'Unready' : 'Declare Ready';
+
+            renderLobby();
+        }
+
+        function hostStartGame() {
+            const session = ensureSession(state.code);
+            if (!session) return showToast('Session missing.');
+            if (session.hostName !== state.name) return showToast('Only host can start.');
+
+            const allReady = session.players.length >= 2 && session.players.every(p => p.isReady);
+            if (!allReady) return showToast('Everyone must be ready (and at least 2 players).');
+
+            session.state = 'active';
+            upsertSession(session);
+
+            enterGameUI();
+            renderGame();
+            showToast('Game started!');
+        }
+
+        function renderLobby() {
+            const session = ensureSession(state.code);
+            if (!session) return;
+
+            const list = document.getElementById('lobbyList');
+            list.innerHTML = '';
+
+            session.players
+                .slice()
+                .sort((a, b) => new Date(a.joinedAt) - new Date(b.joinedAt))
+                .forEach((p, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'leaderboard-item';
+                    row.innerHTML = `
+            <div style="color:var(--text-muted); font-size:0.85rem;">${idx + 1}</div>
+            <div style="font-family:'Cinzel',serif; font-weight:700; color:var(--text-main);">${escapeHtml(p.name)}${p.name === session.hostName ? ' (Host)' : ''}</div>
+            <div class="${p.isReady ? 'status-ready' : 'status-waiting'}">${p.isReady ? 'READY' : 'WAITING'}</div>
+          `;
+                    list.appendChild(row);
+                });
+
+            document.getElementById('lobbyCountText').textContent = `Players: ${session.players.length}/${session.maxPlayers}`;
+
+            if (state.isHost) {
+                const allReady = session.players.length >= 2 && session.players.every(p => p.isReady);
+                document.getElementById('startGameBtn').disabled = !allReady;
+            }
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, m => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[m]));
+        }
+
+        /***********************
+         * Game UI
+         ***********************/
+        function enterGameUI() {
+            showContainer('gameContainer');
+            document.getElementById('playerName').textContent = state.name;
+            document.getElementById('gameCodeDisplay').textContent = `CODE: ${state.code}`;
+            document.getElementById('rollBtn').disabled = false;
+        }
+
+        function computeAvgLast5(arr) {
+            if (!arr.length) return null;
+            const sum = arr.reduce((a, b) => a + b, 0);
+            return (sum / arr.length);
+        }
+
+        function renderGame() {
+            const session = ensureSession(state.code);
+            if (!session) return;
+
+            // leaderboard: rank by avg of last5 (descending), fallback 0
+            const leaderboard = document.getElementById('leaderboard');
+            leaderboard.innerHTML = '';
+
+            const rows = session.players.map(p => {
+                const avg = computeAvgLast5(p.last5 || []);
+                return {
+                    name: p.name,
+                    avg: avg ? ? 0,
+                    avgText: (avg == null ? '-' : avg.toFixed(2)),
+                    isReady: p.isReady
+                };
+            }).sort((a, b) => b.avg - a.avg);
+
+            rows.forEach((r, idx) => {
+                const row = document.createElement('div');
+                row.className = 'leaderboard-item';
+                row.innerHTML = `
+          <div style="color:var(--text-muted); font-size:0.85rem;">${idx + 1}</div>
+          <div style="font-family:'Cinzel',serif; font-weight:700;">${escapeHtml(r.name)}</div>
+          <div style="text-align:right; color:#00ff88; font-weight:700;">${r.avgText}</div>
+        `;
+                leaderboard.appendChild(row);
+            });
+
+            // my stats
+            const me = session.players.find(p => p.name === state.name);
+            if (me) {
+                const last = me.last5 ? .[me.last5.length - 1];
+                const avg = computeAvgLast5(me.last5 || []);
+                document.getElementById('currentRoll').textContent = (last == null ? '-' : String(last));
+                document.getElementById('currentAvg').textContent = (avg == null ? '-' : avg.toFixed(2));
+                document.getElementById('totalCount').textContent = String(me.totalRolls || 0);
+                document.getElementById('rollCounter').textContent = `${(me.last5 || []).length}/5`;
+
+                const last5El = document.getElementById('last5Rolls');
+                last5El.innerHTML = '';
+                (me.last5 || []).forEach(v => {
+                    const dot = document.createElement('div');
+                    dot.className = 'roll-dot filled';
+                    dot.textContent = String(v);
+                    last5El.appendChild(dot);
+                });
+                // fill blanks
+                for (let i = (me.last5 || []).length; i < 5; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'roll-dot';
+                    dot.textContent = '';
+                    last5El.appendChild(dot);
+                }
+            }
+
+            renderDistribution(session);
+        }
+
+        function renderDistribution(session) {
+            // distribution based on all rolls in session
+            const freq = {
+                1: 0,
+                2: 0,
+                3: 0,
+                4: 0,
+                5: 0,
+                6: 0
+            };
+            (session.rolls || []).forEach(e => {
+                if (e.value >= 1 && e.value <= 6) freq[e.value]++;
+            });
+            const max = Math.max(1, ...Object.values(freq));
+
+            for (let i = 1; i <= 6; i++) {
+                const el = document.getElementById(`bar-${i}`);
+                const pct = (freq[i] / max) * 100;
+                el.style.height = `${Math.max(2, pct)}%`;
+                el.classList.toggle('highlight', freq[i] === max && freq[i] > 0);
+            }
+        }
+
+        function rollDice() {
+            const session = ensureSession(state.code);
+            if (!session) return showToast('Session missing.');
+
+            if (session.state !== 'active') return showToast('Game not started.');
+
+            const me = session.players.find(p => p.name === state.name);
+            if (!me) return showToast('Player missing.');
+
+            const value = 1 + Math.floor(Math.random() * 6);
+
+            // update dice animation
+            animateDice(value);
+
+            // record in player
+            me.totalRolls = (me.totalRolls || 0) + 1;
+            me.last5 = [...(me.last5 || []), value].slice(-5);
+
+            // record session event
+            session.rolls = session.rolls || [];
+            session.rolls.push({
+                player: state.name,
+                value,
+                at: nowISO()
+            });
+
+            upsertSession(session);
+
+            renderGame();
+        }
+
+        function animateDice(value) {
+            const cube = document.getElementById('cube');
+            const shadow = document.getElementById('shadow');
+            const rot = faceRotations[value] || {
+                x: 0,
+                y: 0
+            };
+
+            // random extra spins for flair
+            const extraX = 360 * (2 + Math.floor(Math.random() * 2));
+            const extraY = 360 * (2 + Math.floor(Math.random() * 2));
+
+            cube.classList.remove('floating');
+            cube.style.transition = 'transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1)';
+            cube.style.transform = `translateZ(-45px) rotateX(${rot.x + extraX}deg) rotateY(${rot.y + extraY}deg)`;
+            shadow.style.transition = 'transform 0.9s';
+            shadow.style.transform = 'scale(1.15)';
+
+            setTimeout(() => {
+                cube.classList.add('floating');
+                shadow.style.transform = 'scale(1)';
+            }, 900);
+        }
+
+        /***********************
+         * Exit / Reset
+         ***********************/
+        function exitGame() {
+            // Keep sessions in storage; just reset UI state.
+            state.code = '';
+            state.isHost = false;
+            state.isReady = false;
+
+            document.getElementById('lobbyContainer').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'none';
+            showModal('nameModal');
+            showToast('Exited.');
+        }
+
+        /***********************
+         * Sound Toggle (safe attach)
+         ***********************/
+        const soundToggle = document.getElementById('soundToggle');
+        if (soundToggle) {
+            soundToggle.addEventListener('click', () => {
+                state.soundEnabled = !state.soundEnabled;
+                soundToggle.textContent = state.soundEnabled ? '🔊' : '🔇';
+            });
+        }
+    </script>
+</body>
+
+</html>
