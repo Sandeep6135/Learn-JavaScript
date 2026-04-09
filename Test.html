@@ -3,17 +3,1361 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Divine Dice - Ultimate Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;500;700&display=swap');
+         :root {
+            --bg-color: #0d1117;
+            --panel-bg: rgba(20, 25, 35, 0.6);
+            --gold-primary: #d4af37;
+            --gold-glow: rgba(212, 175, 55, 0.4);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --dice-size: 90px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+        
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.15) 0%, transparent 50%), radial-gradient(circle at 50% 100%, rgba(15, 23, 42, 1) 0%, transparent 50%);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            overflow: hidden;
+            perspective: 2000px;
+        }
+        /* Modal for Name Input */
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        
+        .name-modal {
+            background: var(--panel-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 32px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 500px;
+            width: 90%;
+            animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+        
+        .name-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .name-input:focus {
+            outline: none;
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+        
+        .name-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .modal-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            color: var(--gold-primary);
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        
+        .modal-btn:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 20px var(--gold-glow);
+            transform: translateY(-2px);
+        }
+        
+        .modal-btn:active {
+            transform: translateY(0px);
+        }
+        /* Main Container */
+        
+        .main-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            gap: 1.5rem;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .player-badge {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 0.6rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .player-name-display {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--gold-primary);
+        }
+        
+        .player-stats-badge {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--gold-primary);
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .header-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            box-shadow: 0 0 15px var(--gold-glow);
+            transform: scale(1.1);
+        }
+        /* Content Area */
+        
+        .content-area {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2rem;
+            flex: 1;
+            overflow: hidden;
+        }
+        /* Left Panel - Dice */
+        
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+        
+        .dashboard {
+            background: var(--panel-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .title-group {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            margin-bottom: 0.3rem;
+        }
+        
+        .subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        /* Stats Row */
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+        
+        .stat-value {
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            color: var(--gold-primary);
+            font-weight: 700;
+        }
+        /* Dice Arena */
+        
+        .dice-arena {
+            height: 200px;
+            position: relative;
+            perspective: 1000px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        
+        .cube {
+            width: var(--dice-size);
+            height: var(--dice-size);
+            position: relative;
+            transform-style: preserve-3d;
+            transform: translateZ(-45px) rotateX(-20deg) rotateY(20deg);
+        }
+        
+        .face {
+            position: absolute;
+            width: var(--dice-size);
+            height: var(--dice-size);
+            background: #111;
+            border-radius: 16px;
+            display: grid;
+            grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+            padding: 12px;
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.9), inset 0 0 5px rgba(212, 175, 55, 0.3);
+            backface-visibility: hidden;
+        }
+        
+        .dot {
+            width: 14px;
+            height: 14px;
+            background: radial-gradient(circle at 30% 30%, #fff6cc, #d4af37, #997a00);
+            border-radius: 50%;
+            align-self: center;
+            justify-self: center;
+            box-shadow: 0 0 10px var(--gold-glow), inset 0 -2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .front {
+            transform: rotateY(0deg) translateZ(calc(var(--dice-size) / 2));
+        }
+        
+        .back {
+            transform: rotateY(180deg) translateZ(calc(var(--dice-size) / 2));
+        }
+        
+        .right {
+            transform: rotateY(90deg) translateZ(calc(var(--dice-size) / 2));
+        }
+        
+        .left {
+            transform: rotateY(-90deg) translateZ(calc(var(--dice-size) / 2));
+        }
+        
+        .top {
+            transform: rotateX(90deg) translateZ(calc(var(--dice-size) / 2));
+        }
+        
+        .bottom {
+            transform: rotateX(-90deg) translateZ(calc(var(--dice-size) / 2));
+        }
+        
+        .shadow {
+            position: absolute;
+            bottom: 15px;
+            width: 70px;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50%;
+            filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+        /* Distribution Chart */
+        
+        .distribution {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .chart-title {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-bottom: 0.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .bars {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 50px;
+            gap: 6px;
+        }
+        
+        .bar-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .bar {
+            width: 100%;
+            background: rgba(212, 175, 55, 0.15);
+            border-radius: 3px 3px 0 0;
+            transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
+            min-height: 2px;
+        }
+        
+        .bar.highlight {
+            background: var(--gold-primary);
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+        
+        .bar-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+        /* Roll Button */
+        
+        .roll-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            color: var(--gold-primary);
+            font-family: 'Cinzel', serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .roll-btn:hover:not(:disabled) {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 20px var(--gold-glow);
+            transform: translateY(-2px);
+        }
+        
+        .roll-btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+        
+        .roll-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        /* Right Panel - Leaderboard */
+        
+        .right-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .leaderboard-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-primary);
+            margin-bottom: 1rem;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 0.4fr 1.2fr 0.6fr 0.6fr;
+            gap: 8px;
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            margin-bottom: 0.8rem;
+        }
+        
+        .leaderboard-header-item {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        
+        .leaderboard-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .leaderboard-item {
+            display: grid;
+            grid-template-columns: 0.4fr 1.2fr 0.6fr 0.6fr;
+            gap: 8px;
+            padding: 0.9rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .leaderboard-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        
+        .leaderboard-item.updated::before {
+            transform: translateX(100%);
+        }
+        
+        .leaderboard-item:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: rgba(212, 175, 55, 0.3);
+            transform: translateX(4px);
+        }
+        
+        .leaderboard-rank {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--gold-primary);
+            text-align: center;
+        }
+        
+        .leaderboard-rank.rank-1 {
+            color: #ffd700;
+            font-size: 1.1rem;
+        }
+        
+        .leaderboard-rank.rank-2 {
+            color: #c0c0c0;
+        }
+        
+        .leaderboard-rank.rank-3 {
+            color: #cd7f32;
+        }
+        
+        .leaderboard-name {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .leaderboard-name.current {
+            color: var(--gold-primary);
+            font-weight: 700;
+        }
+        
+        .leaderboard-rolls {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .leaderboard-best {
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            color: var(--gold-primary);
+            font-weight: 700;
+        }
+        
+        .new-record {
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffd700;
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+            animation: slideDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        
+        @keyframes slideDown {
+            to {
+                top: -30px;
+                opacity: 0;
+            }
+        }
+        
+         ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+         ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+        
+         ::-webkit-scrollbar-thumb {
+            background: rgba(212, 175, 55, 0.3);
+            border-radius: 3px;
+        }
+        
+         ::-webkit-scrollbar-thumb:hover {
+            background: rgba(212, 175, 55, 0.5);
+        }
+        
+        .streak-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid var(--gold-primary);
+            color: var(--gold-primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--gold-glow);
+            z-index: 20;
+        }
+        
+        .streak-badge.active {
+            opacity: 1;
+            transform: translateY(0);
+            animation: pulse 0.6s infinite;
+        }
+        
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.08);
+            }
+        }
+        
+        @keyframes gentleFloat {
+            0%,
+            100% {
+                transform: translateZ(-45px) rotateX(-20deg) rotateY(20deg) translateY(0);
+            }
+            50% {
+                transform: translateZ(-45px) rotateX(-15deg) rotateY(25deg) translateY(-8px);
+            }
+        }
+        
+        .floating {
+            animation: gentleFloat 4s ease-in-out infinite;
+        }
+        
+        .particles-container {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .spark {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--gold-primary);
+        }
+        
+        @media (max-width: 1280px) {
+            .content-area {
+                grid-template-columns: 1fr 0.9fr;
+                gap: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .content-area {
+                grid-template-columns: 1fr;
+            }
+            .right-panel {
+                max-height: 350px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+                gap: 1rem;
+            }
+            .header {
+                height: auto;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            .title {
+                font-size: 1.5rem;
+            }
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+            .leaderboard-header {
+                grid-template-columns: 0.3fr 1fr 0.5fr 0.5fr;
+                font-size: 0.6rem;
+            }
+            .leaderboard-item {
+                grid-template-columns: 0.3fr 1fr 0.5fr 0.5fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <h1 id="output"></h1>
+    <!-- Name Input Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="name-modal">
+            <div class="modal-title">Divine Dice</div>
+            <div class="modal-subtitle">Enter Your Name to Begin</div>
+            <input type="text" class="name-input" id="nameInput" placeholder="Enter your name..." maxlength="20">
+            <button class="modal-btn" onclick="startGame()">Join The Arena</button>
+        </div>
+    </div>
+
+    <!-- Main Game Container -->
+    <div class="main-container" id="gameContainer" style="display: none;">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="player-badge">
+                    <div class="player-name-display" id="playerName">Player</div>
+                    <div class="player-stats-badge">
+                        <span id="playerRank">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="header-btn" id="soundToggle" title="Toggle Sound">🔊</button>
+                <button class="header-btn" onclick="changePlayer()">👤</button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <div class="dashboard">
+                    <div class="streak-badge" id="streakBadge">🔥 3 IN A ROW!</div>
+
+                    <div class="title-group">
+                        <div class="title">Divine Dice</div>
+                        <div class="subtitle">Modern Antiquity</div>
+                    </div>
+
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Rolls</span>
+                            <span class="stat-value" id="totalCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Last Roll</span>
+                            <span class="stat-value" id="currentRoll">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Average</span>
+                            <span class="stat-value" id="avgRoll">-</span>
+                        </div>
+                    </div>
+
+                    <div class="dice-arena">
+                        <div class="cube floating" id="cube">
+                            <div class="face front">
+                                <div class="dot" style="grid-area: 2/2"></div>
+                            </div>
+                            <div class="face back">
+                                <div class="dot" style="grid-area: 1/1"></div>
+                                <div class="dot" style="grid-area: 1/3"></div>
+                                <div class="dot" style="grid-area: 2/1"></div>
+                                <div class="dot" style="grid-area: 2/3"></div>
+                                <div class="dot" style="grid-area: 3/1"></div>
+                                <div class="dot" style="grid-area: 3/3"></div>
+                            </div>
+                            <div class="face right">
+                                <div class="dot" style="grid-area: 1/3"></div>
+                                <div class="dot" style="grid-area: 2/2"></div>
+                                <div class="dot" style="grid-area: 3/1"></div>
+                            </div>
+                            <div class="face left">
+                                <div class="dot" style="grid-area: 1/1"></div>
+                                <div class="dot" style="grid-area: 1/3"></div>
+                                <div class="dot" style="grid-area: 3/1"></div>
+                                <div class="dot" style="grid-area: 3/3"></div>
+                            </div>
+                            <div class="face top">
+                                <div class="dot" style="grid-area: 1/3"></div>
+                                <div class="dot" style="grid-area: 3/1"></div>
+                            </div>
+                            <div class="face bottom">
+                                <div class="dot" style="grid-area: 1/1"></div>
+                                <div class="dot" style="grid-area: 1/3"></div>
+                                <div class="dot" style="grid-area: 2/2"></div>
+                                <div class="dot" style="grid-area: 3/1"></div>
+                                <div class="dot" style="grid-area: 3/3"></div>
+                            </div>
+                        </div>
+                        <div class="shadow" id="shadow"></div>
+                        <div class="particles-container" id="particles"></div>
+                    </div>
+
+                    <button class="roll-btn" id="rollBtn" onclick="rollDice()">Cast The Bones</button>
+
+                    <div class="distribution">
+                        <div class="chart-title">Outcome Distribution</div>
+                        <div class="bars" id="chartBars">
+                            <div class="bar-container">
+                                <div class="bar" id="bar-1" style="height: 0%"></div><span class="bar-label">1</span>
+                            </div>
+                            <div class="bar-container">
+                                <div class="bar" id="bar-2" style="height: 0%"></div><span class="bar-label">2</span>
+                            </div>
+                            <div class="bar-container">
+                                <div class="bar" id="bar-3" style="height: 0%"></div><span class="bar-label">3</span>
+                            </div>
+                            <div class="bar-container">
+                                <div class="bar" id="bar-4" style="height: 0%"></div><span class="bar-label">4</span>
+                            </div>
+                            <div class="bar-container">
+                                <div class="bar" id="bar-5" style="height: 0%"></div><span class="bar-label">5</span>
+                            </div>
+                            <div class="bar-container">
+                                <div class="bar" id="bar-6" style="height: 0%"></div><span class="bar-label">6</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Leaderboard -->
+            <div class="right-panel">
+                <div class="leaderboard-title">🏆 Leaderboard</div>
+                <div class="leaderboard-header">
+                    <div class="leaderboard-header-item">#</div>
+                    <div class="leaderboard-header-item">Player</div>
+                    <div class="leaderboard-header-item">Rolls</div>
+                    <div class="leaderboard-header-item">Best</div>
+                </div>
+                <div class="leaderboard-list" id="leaderboard"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        setInterval(() => {
-            document.write("Me aagya Bhai");
-        }, 3000)
+        // ===== GAME STATE =====
+        let currentPlayerName = '';
+        let playerSessions = {};
+        let soundEnabled = true;
+        let isRolling = false;
+
+        // Current player data
+        let rolls = [];
+        let freq = {
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0,
+            6: 0
+        };
+        let currentStreak = {
+            value: 0,
+            count: 0
+        };
+        let currentX = -20;
+        let currentY = 20;
+
+        const cube = document.getElementById('cube');
+        const rollBtn = document.getElementById('rollBtn');
+        const shadow = document.getElementById('shadow');
+        const streakBadge = document.getElementById('streakBadge');
+
+        const faceRotations = {
+            1: {
+                x: 0,
+                y: 0
+            },
+            2: {
+                x: -90,
+                y: 0
+            },
+            3: {
+                x: 0,
+                y: -90
+            },
+            4: {
+                x: 0,
+                y: 90
+            },
+            5: {
+                x: 90,
+                y: 0
+            },
+            6: {
+                x: 180,
+                y: 0
+            }
+        };
+
+        // ===== MODAL & NAME INPUT =====
+        function startGame() {
+            const nameInput = document.getElementById('nameInput');
+            const playerName = nameInput.value.trim();
+
+            if (!playerName) {
+                nameInput.style.borderColor = '#ff4444';
+                nameInput.style.boxShadow = '0 0 10px rgba(255, 68, 68, 0.5)';
+                return;
+            }
+
+            currentPlayerName = playerName;
+
+            // Initialize player session
+            if (!playerSessions[playerName]) {
+                playerSessions[playerName] = {
+                    rolls: [],
+                    freq: {
+                        1: 0,
+                        2: 0,
+                        3: 0,
+                        4: 0,
+                        5: 0,
+                        6: 0
+                    },
+                    bestRoll: 0,
+                    totalRolls: 0,
+                    lastRoll: 0
+                };
+            }
+
+            // Load player data
+            loadPlayerData(playerName);
+
+            // Hide modal and show game
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'flex';
+            document.getElementById('playerName').textContent = playerName;
+
+            // Initialize leaderboard with simulated players
+            initializeLeaderboard();
+            updateLeaderboard();
+
+            // Sound toggle
+            document.getElementById('soundToggle').addEventListener('click', function() {
+                soundEnabled = !soundEnabled;
+                this.style.opacity = soundEnabled ? '1' : '0.5';
+            });
+        }
+
+        function changePlayer() {
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.getElementById('nameInput').value = '';
+            document.getElementById('nameInput').style.borderColor = '';
+            document.getElementById('nameInput').style.boxShadow = '';
+        }
+
+        // ===== PLAYER DATA MANAGEMENT =====
+        function loadPlayerData(playerName) {
+            const session = playerSessions[playerName];
+            rolls = [...session.rolls];
+            freq = {...session.freq
+            };
+            currentStreak = {
+                value: 0,
+                count: 0
+            };
+            currentX = -20;
+            currentY = 20;
+
+            updateStatsDisplay();
+        }
+
+        function savePlayerData() {
+            const session = playerSessions[currentPlayerName];
+            session.rolls = [...rolls];
+            session.freq = {...freq
+            };
+            session.bestRoll = Math.max(session.bestRoll, ...rolls) || 0;
+            session.totalRolls = rolls.length;
+            if (rolls.length > 0) session.lastRoll = rolls[rolls.length - 1];
+        }
+
+        // ===== LEADERBOARD SYSTEM =====
+        const simulatedPlayers = [{
+            name: 'Shadow Master',
+            baseSkill: 0.6
+        }, {
+            name: 'Golden Eagle',
+            baseSkill: 0.55
+        }, {
+            name: 'Dice Wizard',
+            baseSkill: 0.5
+        }, {
+            name: 'Lucky Strike',
+            baseSkill: 0.45
+        }, {
+            name: 'Night Roller',
+            baseSkill: 0.4
+        }];
+
+        function initializeLeaderboard() {
+            simulatedPlayers.forEach(player => {
+                if (!playerSessions[player.name]) {
+                    playerSessions[player.name] = {
+                        rolls: [],
+                        freq: {
+                            1: 0,
+                            2: 0,
+                            3: 0,
+                            4: 0,
+                            5: 0,
+                            6: 0
+                        },
+                        bestRoll: 0,
+                        totalRolls: 0,
+                        lastRoll: 0,
+                        baseSkill: player.baseSkill
+                    };
+                }
+            });
+
+            // Simulate some initial rolls for other players
+            simulatedPlayers.forEach(player => {
+                const session = playerSessions[player.name];
+                for (let i = 0; i < Math.floor(Math.random() * 8) + 2; i++) {
+                    simulatePlayerRoll(player.name);
+                }
+            });
+        }
+
+        function simulatePlayerRoll(playerName) {
+            const session = playerSessions[playerName];
+            const baseSkill = session.baseSkill || 0.5;
+
+            // Biased towards higher numbers based on skill
+            const roll = Math.floor(Math.random() ** (1 - baseSkill) * 6) + 1;
+
+            session.rolls.push(roll);
+            session.freq[roll]++;
+            session.bestRoll = Math.max(session.bestRoll, roll);
+            session.totalRolls++;
+            session.lastRoll = roll;
+        }
+
+        function updateLeaderboard() {
+            const leaderboard = Object.entries(playerSessions)
+                .filter(([name]) => name !== '')
+                .map(([name, session]) => ({
+                    name,
+                    totalRolls: session.totalRolls,
+                    bestRoll: session.bestRoll,
+                    lastRoll: session.lastRoll,
+                    isCurrent: name === currentPlayerName
+                }))
+                .sort((a, b) => {
+                    if (b.bestRoll !== a.bestRoll) return b.bestRoll - a.bestRoll;
+                    return b.totalRolls - a.totalRolls;
+                });
+
+            let html = '';
+            leaderboard.forEach((player, idx) => {
+                const rank = idx + 1;
+                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                const nameClass = player.isCurrent ? 'current' : '';
+
+                html += `
+                    <div class="leaderboard-item" id="player-${player.name}">
+                        <div class="leaderboard-rank ${rankClass}">${rank}</div>
+                        <div class="leaderboard-name ${nameClass}">${player.name}</div>
+                        <div class="leaderboard-rolls">${player.totalRolls}</div>
+                        <div class="leaderboard-best">${player.bestRoll || '-'}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('leaderboard').innerHTML = html;
+        }
+
+        function updateLeaderboardWithAnimation(playerName) {
+            setTimeout(() => {
+                const item = document.getElementById(`player-${playerName}`);
+                if (item) {
+                    item.classList.add('updated');
+                    setTimeout(() => item.classList.remove('updated'), 600);
+                }
+                updateLeaderboard();
+            }, 50);
+        }
+
+        // ===== PARTICLE EFFECTS =====
+        function createSparks() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 15; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'spark';
+                spark.style.left = '50%';
+                spark.style.top = '50%';
+                container.appendChild(spark);
+
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 40 + Math.random() * 60;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+
+                spark.animate([{
+                    transform: 'translate(-50%, -50%) scale(1)',
+                    opacity: 1
+                }, {
+                    transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`,
+                    opacity: 0
+                }], {
+                    duration: 600 + Math.random() * 400,
+                    easing: 'cubic-bezier(0, .9, .57, 1)'
+                }).onfinish = () => spark.remove();
+            }
+        }
+
+        // ===== SOUND EFFECTS =====
+        function playRollSound() {
+            if (!soundEnabled) return;
+            try {
+                const audioContext = new(window.AudioContext || window.webkitAudioContext)();
+                const now = audioContext.currentTime;
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } catch (e) {}
+        }
+
+        function playResultSound(value) {
+            if (!soundEnabled) return;
+            try {
+                const audioContext = new(window.AudioContext || window.webkitAudioContext)();
+                const now = audioContext.currentTime;
+                const frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00];
+                const frequency = frequencies[value - 1];
+
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                osc.frequency.setValueAtTime(frequency, now);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+
+                osc.start(now);
+                osc.stop(now + 0.5);
+            } catch (e) {}
+        }
+
+        // ===== DICE ROLLING =====
+        function rollDice() {
+            if (isRolling) return;
+            isRolling = true;
+            rollBtn.disabled = true;
+            cube.classList.remove('floating');
+
+            playRollSound();
+
+            const result = Math.floor(Math.random() * 6) + 1;
+            const target = faceRotations[result];
+
+            const spinsX = (Math.floor(Math.random() * 4) + 4) * 360;
+            const spinsY = (Math.floor(Math.random() * 4) + 4) * 360;
+
+            const finalX = target.x + spinsX;
+            const finalY = target.y + spinsY;
+
+            // Shadow animation
+            shadow.animate([{
+                transform: 'scale(1)',
+                opacity: 0.8
+            }, {
+                transform: 'scale(0.4)',
+                opacity: 0.2,
+                offset: 0.4
+            }, {
+                transform: 'scale(1)',
+                opacity: 0.8
+            }], {
+                duration: 1400,
+                easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
+            });
+
+            // Cube animation
+            const throwAnim = cube.animate([{
+                transform: `translateZ(-45px) translateY(0) rotateX(${currentX}deg) rotateY(${currentY}deg)`
+            }, {
+                transform: `translateZ(80px) translateY(-140px) rotateX(${currentX + spinsX/2}deg) rotateY(${currentY + spinsY/2}deg)`,
+                offset: 0.4,
+                easing: 'ease-in-out'
+            }, {
+                transform: `translateZ(-45px) translateY(0) rotateX(${finalX}deg) rotateY(${finalY}deg)`,
+                offset: 0.8,
+                easing: 'ease-in'
+            }, {
+                transform: `translateZ(-20px) translateY(-20px) rotateX(${finalX + 10}deg) rotateY(${finalY + 10}deg)`,
+                offset: 0.9,
+                easing: 'ease-out'
+            }, {
+                transform: `translateZ(-45px) translateY(0) rotateX(${finalX}deg) rotateY(${finalY}deg)`,
+                offset: 1,
+                easing: 'ease-in'
+            }], {
+                duration: 1400,
+                fill: 'forwards'
+            });
+
+            throwAnim.onfinish = () => {
+                currentX = finalX % 360;
+                currentY = finalY % 360;
+                cube.style.transform = `translateZ(-45px) rotateX(${currentX}deg) rotateY(${currentY}deg)`;
+
+                createSparks();
+                playResultSound(result);
+                updateStats(result);
+
+                // Simulate other players rolling
+                setTimeout(() => {
+                    simulatedPlayers.forEach(player => {
+                        if (Math.random() > 0.3) {
+                            simulatePlayerRoll(player.name);
+                            updateLeaderboardWithAnimation(player.name);
+                        }
+                    });
+                }, 300);
+
+                setTimeout(() => {
+                    cube.classList.add('floating');
+                    isRolling = false;
+                    rollBtn.disabled = false;
+                }, 150);
+            };
+        }
+
+        function updateStats(result) {
+            rolls.push(result);
+            freq[result]++;
+            savePlayerData();
+
+            // Streak tracking
+            if (currentStreak.value === result) {
+                currentStreak.count++;
+            } else {
+                currentStreak.value = result;
+                currentStreak.count = 1;
+            }
+
+            if (currentStreak.count >= 3) {
+                streakBadge.textContent = `🔥 ${currentStreak.count} IN A ROW!`;
+                streakBadge.classList.add('active');
+            } else {
+                streakBadge.classList.remove('active');
+            }
+
+            updateStatsDisplay();
+            updateLeaderboardWithAnimation(currentPlayerName);
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('totalCount').textContent = rolls.length;
+            document.getElementById('currentRoll').textContent = rolls.length > 0 ? rolls[rolls.length - 1] : '-';
+
+            if (rolls.length > 0) {
+                const sum = rolls.reduce((a, b) => a + b, 0);
+                document.getElementById('avgRoll').textContent = (sum / rolls.length).toFixed(1);
+            } else {
+                document.getElementById('avgRoll').textContent = '-';
+            }
+
+            // Update distribution
+            const maxFreq = Math.max(...Object.values(freq));
+            for (let i = 1; i <= 6; i++) {
+                const bar = document.getElementById(`bar-${i}`);
+                const percentage = maxFreq === 0 ? 0 : (freq[i] / maxFreq) * 100;
+                bar.style.height = `${percentage}%`;
+
+                if (rolls.length > 0 && i === rolls[rolls.length - 1]) {
+                    bar.classList.add('highlight');
+                } else {
+                    bar.classList.remove('highlight');
+                }
+            }
+        }
+
+        // ===== ENTER KEY SUPPORT =====
+        document.getElementById('nameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') startGame();
+        });
+
+        // Focus on input on load
+        window.addEventListener('load', () => {
+            document.getElementById('nameInput').focus();
+        });
     </script>
 </body>
 

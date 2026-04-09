@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Modern Functional JS</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;
+            background: #f8f9fa;
+        }
+        
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        #output {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #333;
+        }
+        
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            padding: 8px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <h3>Price Calculator</h3>
+        <input id="priceInput" type="number" placeholder="Enter Base Price (£)">
+        <button onclick="handleCalculation()">Run Pipeline</button>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        /** * ADVANCED CONCEPTS USED:
+         * 1. Arrow Functions (Concise syntax)
+         * 2. Composition (Passing the result of one function to another)
+         * 3. Template Literals (Cleaner string building)
+         */
+
+        // Pure Functions
+        const applyDiscount = price => price * 0.9;
+        const applyTax = price => price * 1.18;
+        const format = val => `£${val.toFixed(2)}`;
+
+        // The "Pipeline" - Composing the logic
+        // This reads: format(applyTax(applyDiscount(input)))
+        const getFinalPrice = (price) => format(applyTax(applyDiscount(price)));
+
+        function handleCalculation() {
+            const input = document.getElementById("priceInput");
+            const display = document.getElementById("output");
+            const val = parseFloat(input.value);
+
+            if (isNaN(val) || val <= 0) {
+                display.innerHTML = "<small style='color:red'>Please enter a valid amount.</small>";
+                return;
+            }
+
+            // Using our composed function
+            display.innerHTML = `
+            <div class="result-row"><span>Original:</span> <b>${format(val)}</b></div>
+            <div class="result-row"><span>Discounted:</span> <b>${format(applyDiscount(val))}</b></div>
+            <div class="result-row"><span>Final (Inc. Tax):</span> <b style="color:green">${getFinalPrice(val)}</b></div>
+        `;
+        }
+    </script>
+
+</body>
+
+</html>
