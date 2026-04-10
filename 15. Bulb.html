@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creative Light Toggle</title>
+    <style>
+        /* CSS - The Design */
+        body {
+            background-color: #1a1a1a; /* Dark room effect */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            transition: background 0.4s ease;
+        }
+
+        .bulb-container {
+            position: relative;
+            margin-bottom: 50px;
+        }
+
+        #bulb {
+            width: 150px;
+            cursor: pointer;
+            filter: grayscale(1); /* Looks "dead" when off */
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        /* The "Glow" effect when the bulb is on */
+        .on #bulb {
+            filter: grayscale(0) drop-shadow(0 0 60px rgba(255, 230, 0, 0.8));
+        }
+
+        .on {
+            background-color: #2c2c2c; /* Lightens the room slightly */
+        }
+
+        /* The Switch Button */
+        #toggleBtn {
+            padding: 15px 50px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            background-color: #444;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: 0.2s;
+        }
+
+        #toggleBtn:active {
+            transform: translateY(4px);
+        }
+
+        .btn-on {
+            background-color: #f1c40f !important;
+            color: #000 !important;
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.4) !important;
+        }
+    </style>
+</head>
+<body id="room">
+
+    <div class="bulb-container">
+        <img id="bulb" src="https://i.postimg.cc/6Qy9YQ90/light-bulb-off.png" alt="Light Bulb">
+    </div>
+
+    <button id="toggleBtn" onclick="toggleLight()">Turn On</button>
+
+    <script>
+        // JavaScript - The Logic
+        function toggleLight() {
+            const bulb = document.getElementById('bulb');
+            const btn = document.getElementById('toggleBtn');
+            const room = document.getElementById('room');
+
+            // Toggle logic using the image source
+            if (bulb.src.match("off")) {
+                // Change to ON
+                bulb.src = "Bulb Photo/on.png";
+                room.classList.add('on');
+                btn.classList.add('btn-on');
+                btn.innerHTML = "Turn Off";
+            } else {
+                // Change to OFF
+                bulb.src = "Bulb Photo/off.png";
+                room.classList.remove('on');
+                btn.classList.remove('btn-on');
+                btn.innerHTML = "Turn On";
+            }
+        }
+    </script>
+</body>
+</html>
